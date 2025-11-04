@@ -1,3 +1,5 @@
+import mysql
+
 from database.DB_connect import get_connection
 from model.automobile import Automobile
 from model.noleggio import Noleggio
@@ -35,8 +37,25 @@ class Autonoleggio:
             Funzione che legge tutte le automobili nel database
             :return: una lista con tutte le automobili presenti oppure None
         """
+        try:
+            cnx = get_connection()
+            cursor = cnx.cursor()
 
-        # TODO
+            query= "SELECT * FROM automobili"
+            cursor.execute(query)
+            results = cursor.fetchall()
+
+            automobili = [Automobile(*row) for row in results]
+
+            cursor.close()
+            cnx.close()
+
+            return automobili if automobili else None
+        except Exception as e:
+            print(f"❌ Errore durante la lettura delle automobili dal database: {e}")
+            return None
+
+
 
     def cerca_automobili_per_modello(self, modello) -> list[Automobile] | None:
         """
@@ -44,4 +63,22 @@ class Autonoleggio:
             :param modello: il modello dell'automobile
             :return: una lista con tutte le automobili di marca e modello indicato oppure None
         """
-        # TODO
+        try:
+            cnx = get_connection()
+            cursor = cnx.cursor()
+
+            query= """SELECT id_auto, marca, modello,anno, disponibile
+                    FROM automobili
+                    WHERE modello=%s"""
+            cursor.execute(query, (modello,))
+            results = cursor.fetchall()
+
+            automobili =[Automobile(*row) for row in results]
+
+            cursor.close()
+            cnx.close()
+
+            return automobili if automobili else None
+        except Exception as e:
+            print(f"❌ Errore durante la ricerca per modello '{modello}': {e}")
+            return None
